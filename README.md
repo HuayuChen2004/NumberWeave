@@ -1,1 +1,3 @@
 # NumberWeave
+---
+require PyQt5
