@@ -20,9 +20,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Number Weave")
-        self.setGeometry(100, 100, 780, 1022)
-        self.width = 780
-        self.height = 1022
+        self.setGeometry(100, 100, 900, 1200)
+        self.width = 900
+        self.height = 1200
         self.initUI()
 
     def initUI(self):
