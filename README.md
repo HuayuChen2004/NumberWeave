@@ -19,3 +19,9 @@ version 1.0.2 modifications:
 2. add undo button
 3. add timer
 4. add auto-fill cross
+
+---
+version 1.0.3 modifications:
+
+1. add check against zero row or column
+2. add choice mode choice after the game is finished
