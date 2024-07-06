@@ -16,6 +16,10 @@ class MainWindow(QMainWindow):
         self.width = 900
         self.height = 1300
         self.actions = []
+        self.timer = QTimer(self)
+        # self.timer.timeout.connect(self.update_timer)
+        self.time_elapsed = QTime(0, 0, 0)
+        # self.timer_label = QLabel("00:00:00", self)
         self.initUI()
 
     def initUI(self):
@@ -154,6 +158,7 @@ class MainWindow(QMainWindow):
         exit_button.clicked.connect(self.close)
 
     def show_choose_mode_screen(self):
+        self.stop_timer()
         self.clear_layout()
         palette = QPalette()
         choose_mode = QPixmap()
@@ -346,8 +351,16 @@ class MainWindow(QMainWindow):
             item.setText(text)
 
     def update_timer(self):
-        self.time_elapsed = self.time_elapsed.addSecs(1)
-        self.timer_label.setText(self.time_elapsed.toString("hh:mm:ss"))
+        if self.timer_label:
+            self.time_elapsed = self.time_elapsed.addSecs(1)
+            self.timer_label.setText(self.time_elapsed.toString("hh:mm:ss"))
+        else:
+            self.stop_timer()  # 如果 QLabel 不存在，停止计时器
+
+    def stop_timer(self):
+        if self.timer.isActive():
+            self.timer.stop()
+        self.timer_label = None  # 清除对 QLabel 的引用
 
     def play_screen(self, size):
 
@@ -361,8 +374,8 @@ class MainWindow(QMainWindow):
         self.current_play_size = size
 
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_timer)
         self.time_elapsed = QTime(0, 0, 0)
+        self.timer.timeout.connect(self.update_timer)
         self.timer_label = QLabel("00:00:00", self)
         self.timer_label.setStyleSheet("""
             QLabel {
@@ -566,6 +579,7 @@ class MainWindow(QMainWindow):
 
     def check_result(self):
         if self.is_finished():
+            self.stop_timer()
             self.show_win_screen()
 
     def is_finished(self):
