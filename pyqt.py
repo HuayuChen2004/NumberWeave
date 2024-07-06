@@ -293,7 +293,7 @@ class MainWindow(QMainWindow):
     def fill_current_cell(self):
         # 获取当前选中的单元格
         current_cell = self.table.currentItem()
-        if current_cell is not None:
+        if current_cell is not None and self.table.currentRow() > 0 and self.table.currentColumn() > 0:
             # 填充当前单元格
             current_cell.setText("")
             current_cell.setText("■")
@@ -304,7 +304,7 @@ class MainWindow(QMainWindow):
     def cross_current_cell(self):
         # 获取当前选中的单元格
         current_cell = self.table.currentItem()
-        if current_cell is not None:
+        if current_cell is not None and self.table.currentRow() > 0 and self.table.currentColumn() > 0:
             # 填充当前单元格
             current_cell.setText("")
             current_cell.setText("x")
@@ -314,7 +314,7 @@ class MainWindow(QMainWindow):
     def clear_current_cell(self):
         # 获取当前选中的单元格
         current_cell = self.table.currentItem()
-        if current_cell is not None:
+        if current_cell is not None and self.table.currentRow() > 0 and self.table.currentColumn() > 0:
             # 填充当前单元格
             current_cell.setText("")
             current_cell.setFont(QFont("Arial", 35, QFont.Bold))
