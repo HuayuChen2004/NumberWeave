@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QPainter, QColor, QPen
 from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QBrush, QPalette
-from PyQt5.QtWidgets import QTableWidgetItem, QTableWidget
+from PyQt5.QtWidgets import QTableWidgetItem, QTableWidget, QDialog
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QMouseEvent
@@ -506,13 +506,91 @@ class MainWindow(QMainWindow):
         self.layout.addLayout(hbox)
 
     def show_to_be_known_screen(self):
+        self.to_be_known_window = ToBeKnownWindow()
+        self.to_be_known_window.show()
+
+    def check_result(self):
+        if self.is_finished():
+            self.show_win_screen()
+
+    def is_finished(self):
+        for i in range(self.current_play_size):
+            for j in range(self.current_play_size):
+                if self.map.map[i][j] == 1 and self.table.item(i+1, j+1).text() != "■":
+                    return False
+        return True
+
+    def show_win_screen(self):
+        self.is_on_win_screen = True
         self.clear_layout()
+        palette = QPalette()
+        win = QPixmap()
+        win.loadFromData(base64.b64decode(win_png))
+        palette.setBrush(QPalette.Background, QBrush(win.scaled(self.width, self.height, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)))
+        self.setPalette(palette)
+
+        self.layout.addStretch(1)  # 添加弹性空间，使后续的控件靠底部对齐
+
+        back_button = QPushButton("Back", self)
+        back_button.setStyleSheet("""
+            QPushButton {
+                background-color: #f44336;
+                color: white;
+                border: none;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 32px;
+                margin: 0px 2px;
+                cursor: pointer;
+                border-radius: 8px;
+                font-weight: bold;
+            }
+        QPushButton:hover {
+            background-color: #da190b;
+            }
+        """)
+        back_button.clicked.connect(lambda: self.play_screen(self.current_play_size))
+
+        self.layout.addWidget(back_button)
+
+
+class MyTableWidget(QTableWidget):
+    def __init__(self, parent=None):
+        self.parent = parent
+        super(MyTableWidget, self).__init__(parent)
+
+    def keyPressEvent(self, event):
+        print("keyPressEvent")
+        parent = self.parent
+        print(parent)
+        if parent and hasattr(parent, 'handleKeyPress'):
+            # print("keyPressEvent")
+            parent.handleKeyPress(event)
+        else:
+            super().keyPressEvent(event)
+
+
+class ToBeKnownWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("To Be Known")
+        self.setGeometry(100, 100, 900, 1200)
+
+        central_widget = QWidget(self)
+        self.setCentralWidget(central_widget)
+        self.layout = QVBoxLayout(central_widget)
+        
         palette = QPalette()
         to_be_known = QPixmap()
         to_be_known.loadFromData(base64.b64decode(to_be_known_png))
-
-        palette.setBrush(QPalette.Background, QBrush(to_be_known.scaled(self.width, self.height, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)))
-        self.setPalette(palette) 
+        
+        palette.setBrush(QPalette.Background, QBrush(to_be_known.scaled(self.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)))
+        self.setPalette(palette)
 
         # 创建一个水平布局来包裹标题，并确保它在水平方向上居中
         title_hbox = QHBoxLayout()
@@ -592,71 +670,9 @@ class MainWindow(QMainWindow):
             background-color: #da190b;
             }
         """)                     
-        back_button.clicked.connect(lambda: self.play_screen(self.current_play_size))
+        back_button.clicked.connect(self.close)
 
         self.layout.addWidget(back_button)
-
-    def check_result(self):
-        if self.is_finished():
-            self.show_win_screen()
-
-    def is_finished(self):
-        for i in range(self.current_play_size):
-            for j in range(self.current_play_size):
-                if self.map.map[i][j] == 1 and self.table.item(i+1, j+1).text() != "■":
-                    return False
-        return True
-
-    def show_win_screen(self):
-        self.is_on_win_screen = True
-        self.clear_layout()
-        palette = QPalette()
-        win = QPixmap()
-        win.loadFromData(base64.b64decode(win_png))
-        palette.setBrush(QPalette.Background, QBrush(win.scaled(self.width, self.height, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)))
-        self.setPalette(palette)
-
-        self.layout.addStretch(1)  # 添加弹性空间，使后续的控件靠底部对齐
-
-        back_button = QPushButton("Back", self)
-        back_button.setStyleSheet("""
-            QPushButton {
-                background-color: #f44336;
-                color: white;
-                border: none;
-                padding: 15px 32px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 32px;
-                margin: 0px 2px;
-                cursor: pointer;
-                border-radius: 8px;
-                font-weight: bold;
-            }
-        QPushButton:hover {
-            background-color: #da190b;
-            }
-        """)
-        back_button.clicked.connect(lambda: self.play_screen(self.current_play_size))
-
-        self.layout.addWidget(back_button)
-
-
-class MyTableWidget(QTableWidget):
-    def __init__(self, parent=None):
-        self.parent = parent
-        super(MyTableWidget, self).__init__(parent)
-
-    def keyPressEvent(self, event):
-        print("keyPressEvent")
-        parent = self.parent
-        print(parent)
-        if parent and hasattr(parent, 'handleKeyPress'):
-            # print("keyPressEvent")
-            parent.handleKeyPress(event)
-        else:
-            super().keyPressEvent(event)
 
 
 if __name__ == "__main__":
