@@ -16,3 +16,4 @@ version 1.0.1 modifications:
 version 1.0.2 modifications:
 
 1. add cell check
+2. add undo button

@@ -15,6 +15,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 900, 1200)
         self.width = 900
         self.height = 1200
+        self.actions = []
         self.initUI()
 
     def initUI(self):
@@ -293,32 +294,56 @@ class MainWindow(QMainWindow):
     def fill_current_cell(self):
         # 获取当前选中的单元格
         current_cell = self.table.currentItem()
-        if current_cell is not None and self.table.currentRow() > 0 and self.table.currentColumn() > 0:
+        row = self.table.currentRow()
+        col = self.table.currentColumn()
+        if current_cell is not None and row > 0 and col > 0:
             # 填充当前单元格
+            text = current_cell.text()
             current_cell.setText("")
             current_cell.setText("■")
             current_cell.setFont(QFont("Arial", 40, QFont.Bold))
             current_cell.setTextAlignment(Qt.AlignCenter)
             current_cell.setForeground(QBrush(Qt.magenta))
+            self.actions.append((row, col, text, "■"))
+            if len(self.actions) > 100:
+                self.actions.pop(0)
 
     def cross_current_cell(self):
         # 获取当前选中的单元格
         current_cell = self.table.currentItem()
-        if current_cell is not None and self.table.currentRow() > 0 and self.table.currentColumn() > 0:
+        row = self.table.currentRow()
+        col = self.table.currentColumn()
+        if current_cell is not None and row > 0 and col > 0:
             # 填充当前单元格
+            text = current_cell.text()
             current_cell.setText("")
             current_cell.setText("x")
             current_cell.setFont(QFont("Arial", 35, QFont.Bold))
             current_cell.setTextAlignment(Qt.AlignCenter)
+            self.actions.append((row, col, text, "x"))
+            if len(self.actions) > 100:
+                self.actions.pop(0)
 
     def clear_current_cell(self):
         # 获取当前选中的单元格
         current_cell = self.table.currentItem()
-        if current_cell is not None and self.table.currentRow() > 0 and self.table.currentColumn() > 0:
+        row = self.table.currentRow()
+        col = self.table.currentColumn()
+        if current_cell is not None and row > 0 and col > 0:
             # 填充当前单元格
+            text = current_cell.text()
             current_cell.setText("")
             current_cell.setFont(QFont("Arial", 35, QFont.Bold))
             current_cell.setTextAlignment(Qt.AlignCenter)
+            self.actions.append((row, col, text, ""))
+            if len(self.actions) > 100:
+                self.actions.pop(0)
+
+    def undo_action(self):
+        if self.actions:
+            row, col, text, new_text = self.actions.pop()
+            item = self.table.item(row, col)
+            item.setText(text)
 
     def play_screen(self, size):
 
@@ -407,7 +432,7 @@ class MainWindow(QMainWindow):
                 text-align: center;
                 text-decoration: none;
                 display: inline-block;
-                font-size: 32px;
+                font-size: 25px;
                 margin: 4px 2px;
                 cursor: pointer;
                 border-radius: 8px;
@@ -419,7 +444,7 @@ class MainWindow(QMainWindow):
         """)                     
         back_button.clicked.connect(self.show_choose_mode_screen)
         # 创建三个按钮
-        to_be_known_button = QPushButton("游戏说明", self)
+        to_be_known_button = QPushButton("To be known", self)
         to_be_known_button.setStyleSheet("""
             QPushButton {
                 background-color: #f44336;
@@ -429,7 +454,7 @@ class MainWindow(QMainWindow):
                 text-align: center;
                 text-decoration: none;
                 display: inline-block;
-                font-size: 32px;
+                font-size: 25px;
                 margin: 4px 2px;
                 cursor: pointer;
                 border-radius: 8px;
@@ -450,7 +475,7 @@ class MainWindow(QMainWindow):
                 text-align: center;
                 text-decoration: none;
                 display: inline-block;
-                font-size: 32px;
+                font-size: 25px;
                 margin: 4px 2px;
                 cursor: pointer;
                 border-radius: 8px;
@@ -461,6 +486,31 @@ class MainWindow(QMainWindow):
             }
         """) 
         submit_button.setText("Submit")
+
+        undo_button = QPushButton("Undo", self)
+        undo_button.setStyleSheet("""
+            QPushButton {
+                background-color: #f44336;
+                color: white;
+                border: none;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 25px;
+                margin: 4px 2px;
+                cursor: pointer;
+                border-radius: 8px;
+                font-weight: bold;
+            }
+        QPushButton:hover {
+            background-color: #da190b;
+            }
+        """) 
+        undo_button.setText("Undo")
+
+        # 为撤销按钮添加点击事件
+        undo_button.clicked.connect(self.undo_action)
 
         # 为按钮添加点击事件
         submit_button.clicked.connect(self.check_result)
@@ -478,6 +528,8 @@ class MainWindow(QMainWindow):
         # 在按钮之间添加弹性空间
         hbox.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         hbox.addWidget(submit_button)
+        hbox.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        hbox.addWidget(undo_button)
         # 再次添加弹性空间
         hbox.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         hbox.addWidget(back_button)
