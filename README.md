@@ -18,3 +18,4 @@ version 1.0.2 modifications:
 1. add cell check
 2. add undo button
 3. add timer
+4. add auto-fill cross

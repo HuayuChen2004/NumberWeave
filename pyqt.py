@@ -312,6 +312,7 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, "■"))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            self.check_row_col_fill(row, col)
 
     def cross_current_cell(self):
         # 获取当前选中的单元格
@@ -328,6 +329,7 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, "x"))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            self.check_row_col_fill(row, col)
 
     def clear_current_cell(self):
         # 获取当前选中的单元格
@@ -343,6 +345,55 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, ""))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            self.check_row_col_fill(row, col)
+
+    def check_row_fill(self, row):
+        row_answer = []
+        for j in range(self.current_play_size):
+            if self.table.item(row, j+1) is None:
+                row_answer.append(0)
+            elif self.table.item(row, j+1).text() == "■":
+                row_answer.append(1)
+            else:
+                row_answer.append(0)
+        str_row_answer = "".join(map(str, row_answer))
+        row_answer_i = [len(x) for x in str_row_answer.split("0") if x]
+        if row_answer_i != self.map.get_row_count()[row-1]:
+            return False
+        else:
+            return True
+        
+    def check_col_fill(self, col):
+        col_answer = []
+        for i in range(self.current_play_size):
+            if self.table.item(i+1, col) is None:
+                col_answer.append(0)
+            elif self.table.item(i+1, col).text() == "■":
+                col_answer.append(1)
+            else:
+                col_answer.append(0)
+        str_col_answer = "".join(map(str, col_answer))
+        col_answer_i = [len(x) for x in str_col_answer.split("0") if x]
+        if col_answer_i != self.map.get_col_count()[col-1]:
+            return False
+        else:
+            return True
+        
+    def check_row_col_fill(self, row, col):
+        if self.check_row_fill(row):
+            for j in range(self.current_play_size):
+                item = self.table.item(row, j+1)
+                if item is None or item.text() != "■":
+                    item.setText("x")
+                    item.setFont(QFont("Arial", 35, QFont.Bold))
+                    item.setTextAlignment(Qt.AlignCenter)
+        if self.check_col_fill(col):
+            for i in range(self.current_play_size):
+                item = self.table.item(i+1, col)
+                if item is None or item.text() != "■":
+                    item.setText("x")
+                    item.setFont(QFont("Arial", 35, QFont.Bold))
+                    item.setTextAlignment(Qt.AlignCenter)
 
     def undo_action(self):
         if self.actions:
@@ -584,26 +635,7 @@ class MainWindow(QMainWindow):
 
     def is_finished(self):
         for i in range(self.current_play_size):
-            row_answer = []
-            for j in range(self.current_play_size):
-                if self.table.item(i+1, j+1).text() == "■":
-                    row_answer.append(1)
-                else:
-                    row_answer.append(0)
-            str_row_answer = "".join(map(str, row_answer))
-            row_answer_i = [len(x) for x in str_row_answer.split("0") if x]
-            if row_answer_i != self.map.get_row_count()[i]:
-                return False
-        for j in range(self.current_play_size):
-            col_answer = []
-            for i in range(self.current_play_size):
-                if self.table.item(i+1, j+1).text() == "■":
-                    col_answer.append(1)
-                else:
-                    col_answer.append(0)
-            str_col_answer = "".join(map(str, col_answer))
-            col_answer_i = [len(x) for x in str_col_answer.split("0") if x]
-            if col_answer_i != self.map.get_col_count()[j]:
+            if not self.check_row_fill(i+1) or not self.check_col_fill(i+1):
                 return False
         return True
 
