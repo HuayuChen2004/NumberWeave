@@ -277,7 +277,6 @@ class MainWindow(QMainWindow):
 
     def handleKeyPress(self, event):
         key = event.key()
-        print(key)
         if key == Qt.Key_Z:
             # 当按下 Z 键时执行的操作
             self.fill_current_cell()
@@ -499,9 +498,27 @@ class MainWindow(QMainWindow):
 
     def is_finished(self):
         for i in range(self.current_play_size):
+            row_answer = []
             for j in range(self.current_play_size):
-                if self.map.map[i][j] == 1 and self.table.item(i+1, j+1).text() != "■":
-                    return False
+                if self.table.item(i+1, j+1).text() == "■":
+                    row_answer.append(1)
+                else:
+                    row_answer.append(0)
+            str_row_answer = "".join(map(str, row_answer))
+            row_answer_i = [len(x) for x in str_row_answer.split("0") if x]
+            if row_answer_i != self.map.get_row_count()[i]:
+                return False
+        for j in range(self.current_play_size):
+            col_answer = []
+            for i in range(self.current_play_size):
+                if self.table.item(i+1, j+1).text() == "■":
+                    col_answer.append(1)
+                else:
+                    col_answer.append(0)
+            str_col_answer = "".join(map(str, col_answer))
+            col_answer_i = [len(x) for x in str_col_answer.split("0") if x]
+            if col_answer_i != self.map.get_col_count()[j]:
+                return False
         return True
 
     def show_win_screen(self):
@@ -546,9 +563,7 @@ class MyTableWidget(QTableWidget):
         super(MyTableWidget, self).__init__(parent)
 
     def keyPressEvent(self, event):
-        print("keyPressEvent")
         parent = self.parent
-        print(parent)
         if parent and hasattr(parent, 'handleKeyPress'):
             parent.handleKeyPress(event)
         else:
@@ -663,5 +678,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     mainWin = MainWindow()
     mainWin.show()
-    print(mainWin)
     sys.exit(app.exec_())
