@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QTextEdit
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QStackedWidget, QLabel, QLineEdit
+from PyQt5.QtCore import QObject, QEvent
 from memory_pic import background_png, play_png, purple_png, to_be_known_png, win_png, choose_mode_png
 import base64
 from map import Map  # 假设Map类适用于PyQt5
@@ -287,12 +288,16 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(back_button)
 
     def keyPressEvent(self, event):
-        if event.modifiers() == Qt.ControlModifier:
-            # 当按下 Ctrl 键时执行的操作
+        print(event.key())
+        if event.key() == Qt.Key_Z:
+            # 当按下 Z 键时执行的操作
             self.fill_current_cell()
-        elif event.modifiers() == Qt.AltModifier:
-            # 当按下 Alt 键时执行的操作
+        elif event.key() == Qt.Key_X:
+            # 当按下 X 键时执行的操作
             self.cross_current_cell()
+        elif event.key() == Qt.Key_C:
+            # 当按下 C 键时执行的操作
+            self.clear_current_cell()
         else:
             # 对于其他按键，调用基类的处理方法
             super().keyPressEvent(event)
@@ -319,6 +324,15 @@ class MainWindow(QMainWindow):
             current_cell.setFont(QFont("Arial", 35, QFont.Bold))
             current_cell.setTextAlignment(Qt.AlignCenter)
 
+    def clear_current_cell(self):
+        # 获取当前选中的单元格
+        current_cell = self.table.currentItem()
+        if current_cell is not None:
+            # 填充当前单元格
+            current_cell.setText("")
+            current_cell.setFont(QFont("Arial", 35, QFont.Bold))
+            current_cell.setTextAlignment(Qt.AlignCenter)
+
     def play_screen(self, size):
 
         self.clear_layout()
@@ -337,13 +351,7 @@ class MainWindow(QMainWindow):
         self.table.horizontalHeader().setVisible(False)  # 隐藏水平表头
         self.table.verticalHeader().setVisible(False)  # 隐藏垂直表头
 
-        # self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        # self.table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
-
-        # # 为第一行和第一列设置固定大小
-        # fixedSize = 100  # 你希望的固定大小
-        # self.table.setColumnWidth(0, fixedSize)  # 为第一列设置固定宽度
-        # self.table.setRowHeight(0, fixedSize)  # 为第一行设置固定高度
+        self.table.setFocusPolicy(Qt.StrongFocus)  # 设置焦点策略
         
         self.table.setStyleSheet("""
             QTableWidget {
@@ -388,6 +396,9 @@ class MainWindow(QMainWindow):
                     item.setFont(QFont("Arial", 16, QFont.Bold))
                 else:
                     item = QTableWidgetItem("")
+                flags = item.flags()
+                flags &= ~Qt.ItemIsEditable  # 禁止编辑
+                item.setFlags(flags)
                 self.table.setItem(i, j, item)
 
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
