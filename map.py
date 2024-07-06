@@ -10,6 +10,14 @@ class Map:
         for i in range(self.size):
             for j in range(self.size):
                 self.map[i][j] = random.randint(0, 1)
+        for i in range(self.size):
+            if self.map[i].count(1) == 0:
+                self.map[i][random.randint(0, self.size - 1)] = 1
+        transposed_map = [[self.map[j][i] for j in range(self.size)] for i in range(self.size)]
+        for i in range(self.size):
+            if transposed_map[i].count(1) == 0:
+                transposed_map[i][random.randint(0, self.size - 1)] = 1
+        self.map = [[transposed_map[j][i] for j in range(self.size)] for i in range(self.size)]
 
     def __str__(self):
         s = ""
