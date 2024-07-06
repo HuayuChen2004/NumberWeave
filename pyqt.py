@@ -1,19 +1,10 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QSpacerItem, QSizePolicy, QHBoxLayout
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QHeaderView, QTextEdit,
+    QWidget, QSpacerItem, QSizePolicy, QHBoxLayout, QTableWidgetItem, QTableWidget
+)
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QPainter, QColor, QPen
-from PyQt5.QtGui import QFont
-from PyQt5.QtGui import QBrush, QPalette
-from PyQt5.QtWidgets import QTableWidgetItem, QTableWidget, QDialog
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QHeaderView
-from PyQt5.QtGui import QMouseEvent
-from PyQt5.QtGui import QKeyEvent
-from PyQt5.QtWidgets import QLineEdit
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QTextEdit
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QStackedWidget, QLabel, QLineEdit
-from PyQt5.QtCore import QObject, QEvent
-from memory_pic import background_png, play_png, purple_png, to_be_known_png, win_png, choose_mode_png
+from PyQt5.QtGui import QPixmap, QFont, QBrush, QPalette
+from memory_pic import background_png, play_png, to_be_known_png, win_png, choose_mode_png
 import base64
 from map import Map  # 假设Map类适用于PyQt5
 
@@ -72,7 +63,7 @@ class MainWindow(QMainWindow):
         self.setPalette(palette)    
 
         # 设置垂直布局的间隙
-        self.layout.setSpacing(100)  # 假设您想要的间隙是10像素
+        self.layout.setSpacing(100)
 
         self.layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
         
@@ -254,7 +245,7 @@ class MainWindow(QMainWindow):
             background-color: #45a049;
             }
         """)                     
-        custom_button.clicked.connect(lambda: self.play_screen(10))  # 示例，实际中可能需要更复杂的逻辑
+        custom_button.clicked.connect(lambda: self.play_screen(10))  
 
         back_button = QPushButton("Back", self)
         back_button.setStyleSheet("""
@@ -338,7 +329,7 @@ class MainWindow(QMainWindow):
         play.loadFromData(base64.b64decode(play_png))
         palette.setBrush(QPalette.Background, QBrush(play))
         self.setPalette(palette) 
-        self.map = Map(size)  # 假设Map类适用于PyQt5
+        self.map = Map(size)  
         self.current_play_size = size
         # 创建表格
         self.table = MyTableWidget(self)
@@ -347,10 +338,6 @@ class MainWindow(QMainWindow):
 
         self.table.horizontalHeader().setVisible(False)  # 隐藏水平表头
         self.table.verticalHeader().setVisible(False)  # 隐藏垂直表头
-
-        # self.table.setFocusPolicy(Qt.StrongFocus)  # 设置焦点策略
-        # self.table.setFocus()
-
         
         self.table.setStyleSheet("""
             QTableWidget {
@@ -381,8 +368,8 @@ class MainWindow(QMainWindow):
         row_count = self.map.get_row_count()
 
         for i in range(size+1):
-            self.table.setColumnWidth(i, 50)  # 设置列宽为100像素
-            self.table.setRowHeight(i, 50)  # 设置行高为50像素
+            self.table.setColumnWidth(i, 50)  
+            self.table.setRowHeight(i, 50) 
 
         # 填充表格数据
         for i in range(size+1):
@@ -405,8 +392,6 @@ class MainWindow(QMainWindow):
 
         self.table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.verticalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-
-        # self.table.itemChanged.connect(self.check_table)
 
         self.layout.addWidget(self.table)
 
@@ -482,7 +467,6 @@ class MainWindow(QMainWindow):
         submit_button.clicked.connect(self.check_result)
 
         to_be_known_button.clicked.connect(self.show_to_be_known_screen)
-        # submit_button.clicked.connect(cross_current_cell)
 
         # 创建一个水平布局
         hbox = QHBoxLayout()
@@ -566,7 +550,6 @@ class MyTableWidget(QTableWidget):
         parent = self.parent
         print(parent)
         if parent and hasattr(parent, 'handleKeyPress'):
-            # print("keyPressEvent")
             parent.handleKeyPress(event)
         else:
             super().keyPressEvent(event)
