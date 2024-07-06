@@ -34,9 +34,10 @@ class MainWindow(QMainWindow):
         self.central_widget.setLayout(self.layout)
         self.is_on_win_screen = False
 
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocus()
+
         self.show_start_screen()
-
-
 
     def clear_layout(self):
         item_list = list(range(self.layout.count()))
@@ -159,10 +160,6 @@ class MainWindow(QMainWindow):
         # 为按钮添加点击事件
         play_button.clicked.connect(self.show_choose_mode_screen)
         exit_button.clicked.connect(self.close)
-
-    
-    
-    # 如果有更多控件，重复上述步骤
 
     def show_choose_mode_screen(self):
         self.clear_layout()
@@ -287,15 +284,16 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(custom_button)
         self.layout.addWidget(back_button)
 
-    def keyPressEvent(self, event):
-        print(event.key())
-        if event.key() == Qt.Key_Z:
+    def handleKeyPress(self, event):
+        key = event.key()
+        print(key)
+        if key == Qt.Key_Z:
             # 当按下 Z 键时执行的操作
             self.fill_current_cell()
-        elif event.key() == Qt.Key_X:
+        elif key == Qt.Key_X:
             # 当按下 X 键时执行的操作
             self.cross_current_cell()
-        elif event.key() == Qt.Key_C:
+        elif key == Qt.Key_C:
             # 当按下 C 键时执行的操作
             self.clear_current_cell()
         else:
@@ -312,7 +310,6 @@ class MainWindow(QMainWindow):
             current_cell.setFont(QFont("Arial", 40, QFont.Bold))
             current_cell.setTextAlignment(Qt.AlignCenter)
             current_cell.setForeground(QBrush(Qt.magenta))
-
 
     def cross_current_cell(self):
         # 获取当前选中的单元格
@@ -344,14 +341,16 @@ class MainWindow(QMainWindow):
         self.map = Map(size)  # 假设Map类适用于PyQt5
         self.current_play_size = size
         # 创建表格
-        self.table = QTableWidget(self)
+        self.table = MyTableWidget(self)
         self.table.setRowCount(size+1)  # 设置行数
         self.table.setColumnCount(size+1)  # 设置列数
 
         self.table.horizontalHeader().setVisible(False)  # 隐藏水平表头
         self.table.verticalHeader().setVisible(False)  # 隐藏垂直表头
 
-        self.table.setFocusPolicy(Qt.StrongFocus)  # 设置焦点策略
+        # self.table.setFocusPolicy(Qt.StrongFocus)  # 设置焦点策略
+        # self.table.setFocus()
+
         
         self.table.setStyleSheet("""
             QTableWidget {
@@ -644,9 +643,26 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(back_button)
 
 
+class MyTableWidget(QTableWidget):
+    def __init__(self, parent=None):
+        self.parent = parent
+        super(MyTableWidget, self).__init__(parent)
+
+    def keyPressEvent(self, event):
+        print("keyPressEvent")
+        parent = self.parent
+        print(parent)
+        if parent and hasattr(parent, 'handleKeyPress'):
+            # print("keyPressEvent")
+            parent.handleKeyPress(event)
+        else:
+            super().keyPressEvent(event)
+
+
 if __name__ == "__main__":
     import sys
     app = QApplication(sys.argv)
     mainWin = MainWindow()
     mainWin.show()
+    print(mainWin)
     sys.exit(app.exec_())
