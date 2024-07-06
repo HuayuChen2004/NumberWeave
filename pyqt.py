@@ -650,8 +650,8 @@ class MainWindow(QMainWindow):
 
         self.layout.addStretch(1)  # 添加弹性空间，使后续的控件靠底部对齐
 
-        back_button = QPushButton("Back", self)
-        back_button.setStyleSheet("""
+        choose_mode_button = QPushButton("Choose Mode", self)
+        choose_mode_button.setStyleSheet("""
             QPushButton {
                 background-color: #f44336;
                 color: white;
@@ -670,9 +670,33 @@ class MainWindow(QMainWindow):
             background-color: #da190b;
             }
         """)
-        back_button.clicked.connect(lambda: self.play_screen(self.current_play_size))
+        choose_mode_button.clicked.connect(self.show_choose_mode_screen)
 
-        self.layout.addWidget(back_button)
+        self.layout.addWidget(choose_mode_button)
+
+        continue_button = QPushButton("Continue", self)
+        continue_button.setStyleSheet("""
+            QPushButton {
+                background-color: #f44336;
+                color: white;
+                border: none;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 32px;
+                margin: 0px 2px;
+                cursor: pointer;
+                border-radius: 8px;
+                font-weight: bold;
+            }
+        QPushButton:hover {
+            background-color: #da190b;
+            }
+        """)
+        continue_button.clicked.connect(lambda: self.play_screen(self.current_play_size))
+
+        self.layout.addWidget(continue_button)
 
 
 class MyTableWidget(QTableWidget):
