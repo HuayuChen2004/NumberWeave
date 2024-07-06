@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QHeaderView, QTextEdit,
     QWidget, QSpacerItem, QSizePolicy, QHBoxLayout, QTableWidgetItem, QTableWidget
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer, QTime
 from PyQt5.QtGui import QPixmap, QFont, QBrush, QPalette
 from memory_pic import background_png, play_png, to_be_known_png, win_png, choose_mode_png
 import base64
@@ -12,9 +12,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Number Weave")
-        self.setGeometry(100, 100, 900, 1200)
+        self.setGeometry(100, 100, 900, 1300)
         self.width = 900
-        self.height = 1200
+        self.height = 1300
         self.actions = []
         self.initUI()
 
@@ -345,6 +345,10 @@ class MainWindow(QMainWindow):
             item = self.table.item(row, col)
             item.setText(text)
 
+    def update_timer(self):
+        self.time_elapsed = self.time_elapsed.addSecs(1)
+        self.timer_label.setText(self.time_elapsed.toString("hh:mm:ss"))
+
     def play_screen(self, size):
 
         self.clear_layout()
@@ -355,6 +359,22 @@ class MainWindow(QMainWindow):
         self.setPalette(palette) 
         self.map = Map(size)  
         self.current_play_size = size
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_timer)
+        self.time_elapsed = QTime(0, 0, 0)
+        self.timer_label = QLabel("00:00:00", self)
+        self.timer_label.setStyleSheet("""
+            QLabel {
+                font-size: 32px;
+                font-weight: bold;
+                color: black;
+                margin-top: 10px;
+                margin-left: 10px;
+            }
+        """)
+        self.layout.addWidget(self.timer_label)
+        self.timer.start(1000)  # 每1000毫秒更新一次
         # 创建表格
         self.table = MyTableWidget(self)
         self.table.setRowCount(size+1)  # 设置行数
@@ -629,7 +649,7 @@ class ToBeKnownWindow(QMainWindow):
 
     def initUI(self):
         self.setWindowTitle("To Be Known")
-        self.setGeometry(100, 100, 900, 1200)
+        self.setGeometry(100, 100, 900, 1300)
 
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
