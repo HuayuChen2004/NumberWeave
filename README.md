@@ -9,5 +9,5 @@ version 1.0.1 modifications:
 1. modify default window size
 2. add a key press event to clear the current cell
 3. modify keys
-4. split the "to be known" to be a new window
+4. split the "to be known" to be a new window so that you will not lose your progress
 5. add multiple solutions
