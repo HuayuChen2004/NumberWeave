@@ -24,4 +24,5 @@ version 1.0.2 modifications:
 version 1.0.3 modifications:
 
 1. add check against zero row or column
-2. add choice mode choice after the game is finished
+2. add choose mode choice after the game is finished
+3. add marker

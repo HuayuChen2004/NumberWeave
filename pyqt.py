@@ -292,6 +292,9 @@ class MainWindow(QMainWindow):
         elif key == Qt.Key_C:
             # 当按下 C 键时执行的操作
             self.clear_current_cell()
+        elif key == Qt.Key_M:
+            # 当按下 M 键时执行的操作
+            self.mark_current_cell()
         else:
             # 对于其他按键，调用基类的处理方法
             super().keyPressEvent(event)
@@ -310,6 +313,24 @@ class MainWindow(QMainWindow):
             current_cell.setTextAlignment(Qt.AlignCenter)
             current_cell.setForeground(QBrush(Qt.magenta))
             self.actions.append((row, col, text, "■"))
+            if len(self.actions) > 100:
+                self.actions.pop(0)
+            self.check_row_col_fill(row, col)
+
+    def mark_current_cell(self):
+        # 获取当前选中的单元格
+        current_cell = self.table.currentItem()
+        row = self.table.currentRow()
+        col = self.table.currentColumn()
+        if current_cell is not None and row > 0 and col > 0:
+            # 填充当前单元格
+            text = current_cell.text()
+            current_cell.setText("")
+            current_cell.setText("▲")
+            current_cell.setFont(QFont("Arial", 40, QFont.Bold))
+            current_cell.setTextAlignment(Qt.AlignCenter)
+            current_cell.setForeground(QBrush(Qt.magenta))
+            self.actions.append((row, col, text, "▲"))
             if len(self.actions) > 100:
                 self.actions.pop(0)
             self.check_row_col_fill(row, col)
@@ -352,7 +373,7 @@ class MainWindow(QMainWindow):
         for j in range(self.current_play_size):
             if self.table.item(row, j+1) is None:
                 row_answer.append(0)
-            elif self.table.item(row, j+1).text() == "■":
+            elif self.table.item(row, j+1).text() == "■" or self.table.item(row, j+1).text() == "▲":
                 row_answer.append(1)
             else:
                 row_answer.append(0)
@@ -368,7 +389,7 @@ class MainWindow(QMainWindow):
         for i in range(self.current_play_size):
             if self.table.item(i+1, col) is None:
                 col_answer.append(0)
-            elif self.table.item(i+1, col).text() == "■":
+            elif self.table.item(i+1, col).text() == "■" or self.table.item(i+1, col).text() == "▲":
                 col_answer.append(1)
             else:
                 col_answer.append(0)
@@ -383,14 +404,14 @@ class MainWindow(QMainWindow):
         if self.check_row_fill(row):
             for j in range(self.current_play_size):
                 item = self.table.item(row, j+1)
-                if item is None or item.text() != "■":
+                if item is None or item.text() not in ["■", "▲"]:
                     item.setText("x")
                     item.setFont(QFont("Arial", 35, QFont.Bold))
                     item.setTextAlignment(Qt.AlignCenter)
         if self.check_col_fill(col):
             for i in range(self.current_play_size):
                 item = self.table.item(i+1, col)
-                if item is None or item.text() != "■":
+                if item is None or item.text() not in ["■", "▲"]:
                     item.setText("x")
                     item.setFont(QFont("Arial", 35, QFont.Bold))
                     item.setTextAlignment(Qt.AlignCenter)
