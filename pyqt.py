@@ -311,18 +311,22 @@ class MainWindow(QMainWindow):
             super().keyPressEvent(event)
 
     def rewind_auto_fill(self, row, col):
+        cells_to_check = []
         if not self.check_row_fill(row):
             for j in range(self.current_play_size):
-                if (row, j+1) in self.auto_filled_cells:
-                    item = self.table.item(row, j+1)
-                    item.setText("")
-                    self.auto_filled_cells.remove((row, j+1))
+                if (row, j+1) in self.auto_filled_cells and j+1 != col:
+                    cells_to_check.append((row, j+1))
         if not self.check_col_fill(col):
             for i in range(self.current_play_size):
-                if (i+1, col) in self.auto_filled_cells:
-                    item = self.table.item(i+1, col)
-                    item.setText("")
-                    self.auto_filled_cells.remove((i+1, col))
+                if (i+1, col) in self.auto_filled_cells and i+1 != row:
+                    cells_to_check.append((i+1, col))
+        for cell in cells_to_check:
+            if not self.check_col_fill(cell[1]) and not self.check_row_fill(cell[0]):
+                item = self.table.item(cell[0], cell[1])
+                item.setText("")
+                item.setFont(QFont("Arial", 35, QFont.Bold))
+                item.setTextAlignment(Qt.AlignCenter)
+                self.auto_filled_cells.remove(cell)
 
     def fill_current_cell(self):
         # 获取当前选中的单元格
@@ -340,6 +344,8 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, "■"))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            if (row, col) in self.auto_filled_cells:
+                self.auto_filled_cells.remove((row, col))
             self.rewind_auto_fill(row, col)
             self.check_row_col_fill(row, col)
 
@@ -359,6 +365,8 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, "▲"))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            if (row, col) in self.auto_filled_cells:
+                self.auto_filled_cells.remove((row, col))
             self.rewind_auto_fill(row, col)
             self.check_row_col_fill(row, col)
 
@@ -377,6 +385,8 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, "x"))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            if (row, col) in self.auto_filled_cells:
+                self.auto_filled_cells.remove((row, col))
             self.rewind_auto_fill(row, col)
             self.check_row_col_fill(row, col)
 
@@ -394,6 +404,8 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, ""))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            if (row, col) in self.auto_filled_cells:
+                self.auto_filled_cells.remove((row, col))
             self.rewind_auto_fill(row, col)
             self.check_row_col_fill(row, col)
 
@@ -453,6 +465,8 @@ class MainWindow(QMainWindow):
             row, col, text, new_text = self.actions.pop()
             item = self.table.item(row, col)
             item.setText(text)
+            self.rewind_auto_fill(row, col)
+            self.check_row_col_fill(row, col)
 
     def update_timer(self):
         if self.timer_label:
@@ -828,9 +842,11 @@ class ToBeKnownWindow(QMainWindow):
         """)
         text_box.setPlainText("""
         1. 对选中的单元格，按下"Z"标记填充，按下"X"标记叉，按下"C"清空该单元格。\n
-        2. 如在游戏中发现任何问题，请联系开发人员，你的意见对我们十分重要！\n
+        2. 按下"M"标记该单元格。该标记与填充是一样的效果，可以用于标记那些不能完全确定，尝试性填充的单元格。\n
+        3. 注意：如果某一行或者某一列已经满足要求，其他未填充的单元格的叉可能不能修改！如果需要修改，请检查并修改那些已填充的单元格\n
+        3. 如在游戏中发现任何问题，请联系开发人员，你的意见对我们十分重要！\n
             开发人员微信：cauchy_stay_with_you\n
-        3. 后续版本更新将会同步到github上，欢迎大家关注！
+        4. 后续版本更新将会同步到github上，欢迎大家关注！
         """)
         text_box.setReadOnly(True)
 
