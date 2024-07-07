@@ -17,9 +17,8 @@ class MainWindow(QMainWindow):
         self.height = 1300
         self.actions = []
         self.timer = QTimer(self)
-        # self.timer.timeout.connect(self.update_timer)
         self.time_elapsed = QTime(0, 0, 0)
-        # self.timer_label = QLabel("00:00:00", self)
+        self.auto_filled_cells = []
         self.initUI()
 
     def initUI(self):
@@ -311,6 +310,20 @@ class MainWindow(QMainWindow):
             # 对于其他按键，调用基类的处理方法
             super().keyPressEvent(event)
 
+    def rewind_auto_fill(self, row, col):
+        if not self.check_row_fill(row):
+            for j in range(self.current_play_size):
+                if (row, j+1) in self.auto_filled_cells:
+                    item = self.table.item(row, j+1)
+                    item.setText("")
+                    self.auto_filled_cells.remove((row, j+1))
+        if not self.check_col_fill(col):
+            for i in range(self.current_play_size):
+                if (i+1, col) in self.auto_filled_cells:
+                    item = self.table.item(i+1, col)
+                    item.setText("")
+                    self.auto_filled_cells.remove((i+1, col))
+
     def fill_current_cell(self):
         # 获取当前选中的单元格
         current_cell = self.table.currentItem()
@@ -327,6 +340,7 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, "■"))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            self.rewind_auto_fill(row, col)
             self.check_row_col_fill(row, col)
 
     def mark_current_cell(self):
@@ -345,6 +359,7 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, "▲"))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            self.rewind_auto_fill(row, col)
             self.check_row_col_fill(row, col)
 
     def cross_current_cell(self):
@@ -362,6 +377,7 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, "x"))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            self.rewind_auto_fill(row, col)
             self.check_row_col_fill(row, col)
 
     def clear_current_cell(self):
@@ -378,6 +394,7 @@ class MainWindow(QMainWindow):
             self.actions.append((row, col, text, ""))
             if len(self.actions) > 100:
                 self.actions.pop(0)
+            self.rewind_auto_fill(row, col)
             self.check_row_col_fill(row, col)
 
     def check_row_fill(self, row):
@@ -413,20 +430,23 @@ class MainWindow(QMainWindow):
             return True
         
     def check_row_col_fill(self, row, col):
+        """check if the row and col are filled, if filled, fill the rest of the row and col with cross."""
         if self.check_row_fill(row):
             for j in range(self.current_play_size):
                 item = self.table.item(row, j+1)
-                if item is None or item.text() not in ["■", "▲"]:
+                if item is None or item.text() == "":
                     item.setText("x")
                     item.setFont(QFont("Arial", 35, QFont.Bold))
                     item.setTextAlignment(Qt.AlignCenter)
+                    self.auto_filled_cells.append((row, j+1))
         if self.check_col_fill(col):
             for i in range(self.current_play_size):
                 item = self.table.item(i+1, col)
-                if item is None or item.text() not in ["■", "▲"]:
+                if item is None or item.text() == "":
                     item.setText("x")
                     item.setFont(QFont("Arial", 35, QFont.Bold))
                     item.setTextAlignment(Qt.AlignCenter)
+                    self.auto_filled_cells.append((i+1, col))
 
     def undo_action(self):
         if self.actions:

@@ -27,3 +27,4 @@ version 1.0.3 modifications:
 2. add choose mode choice after the game is finished
 3. add marker
 4. add key direction movement
+5. add auto fill crosses rewind
