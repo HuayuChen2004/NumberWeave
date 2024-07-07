@@ -26,3 +26,4 @@ version 1.0.3 modifications:
 1. add check against zero row or column
 2. add choose mode choice after the game is finished
 3. add marker
+4. add key direction movement

@@ -295,6 +295,18 @@ class MainWindow(QMainWindow):
         elif key == Qt.Key_M:
             # 当按下 M 键时执行的操作
             self.mark_current_cell()
+        elif key in (Qt.Key_Up, Qt.Key_Down, Qt.Key_Left, Qt.Key_Right):
+            # 处理方向键
+            row = self.table.currentRow()
+            col = self.table.currentColumn()
+            if key == Qt.Key_Up and row > 0:
+                self.table.setCurrentCell(row - 1, col)
+            elif key == Qt.Key_Down and row < self.table.rowCount() - 1:
+                self.table.setCurrentCell(row + 1, col)
+            elif key == Qt.Key_Left and col > 0:
+                self.table.setCurrentCell(row, col - 1)
+            elif key == Qt.Key_Right and col < self.table.columnCount() - 1:
+                self.table.setCurrentCell(row, col + 1)
         else:
             # 对于其他按键，调用基类的处理方法
             super().keyPressEvent(event)
