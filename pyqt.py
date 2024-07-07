@@ -15,7 +15,8 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 900, 1300)
         self.width = 900
         self.height = 1300
-        self.actions = []
+        self.past_actions = []
+        self.future_actions = []
         self.timer = QTimer(self)
         self.time_elapsed = QTime(0, 0, 0)
         self.auto_filled_cells = []
@@ -341,9 +342,9 @@ class MainWindow(QMainWindow):
             current_cell.setFont(QFont("Arial", 40, QFont.Bold))
             current_cell.setTextAlignment(Qt.AlignCenter)
             current_cell.setForeground(QBrush(Qt.magenta))
-            self.actions.append((row, col, text, "■"))
-            if len(self.actions) > 100:
-                self.actions.pop(0)
+            self.past_actions.append((row, col, text, "■"))
+            if len(self.past_actions) > 150:
+                self.past_actions.pop(0)
             if (row, col) in self.auto_filled_cells:
                 self.auto_filled_cells.remove((row, col))
             self.rewind_auto_fill(row, col)
@@ -362,9 +363,9 @@ class MainWindow(QMainWindow):
             current_cell.setFont(QFont("Arial", 40, QFont.Bold))
             current_cell.setTextAlignment(Qt.AlignCenter)
             current_cell.setForeground(QBrush(Qt.magenta))
-            self.actions.append((row, col, text, "▲"))
-            if len(self.actions) > 100:
-                self.actions.pop(0)
+            self.past_actions.append((row, col, text, "▲"))
+            if len(self.past_actions) > 100:
+                self.past_actions.pop(0)
             if (row, col) in self.auto_filled_cells:
                 self.auto_filled_cells.remove((row, col))
             self.rewind_auto_fill(row, col)
@@ -382,9 +383,9 @@ class MainWindow(QMainWindow):
             current_cell.setText("x")
             current_cell.setFont(QFont("Arial", 35, QFont.Bold))
             current_cell.setTextAlignment(Qt.AlignCenter)
-            self.actions.append((row, col, text, "x"))
-            if len(self.actions) > 100:
-                self.actions.pop(0)
+            self.past_actions.append((row, col, text, "x"))
+            if len(self.past_actions) > 100:
+                self.past_actions.pop(0)
             if (row, col) in self.auto_filled_cells:
                 self.auto_filled_cells.remove((row, col))
             self.rewind_auto_fill(row, col)
@@ -401,9 +402,9 @@ class MainWindow(QMainWindow):
             current_cell.setText("")
             current_cell.setFont(QFont("Arial", 35, QFont.Bold))
             current_cell.setTextAlignment(Qt.AlignCenter)
-            self.actions.append((row, col, text, ""))
-            if len(self.actions) > 100:
-                self.actions.pop(0)
+            self.past_actions.append((row, col, text, ""))
+            if len(self.past_actions) > 100:
+                self.past_actions.pop(0)
             if (row, col) in self.auto_filled_cells:
                 self.auto_filled_cells.remove((row, col))
             self.rewind_auto_fill(row, col)
@@ -460,11 +461,23 @@ class MainWindow(QMainWindow):
                     item.setTextAlignment(Qt.AlignCenter)
                     self.auto_filled_cells.append((i+1, col))
 
-    def undo_action(self):
-        if self.actions:
-            row, col, text, new_text = self.actions.pop()
+    def action_backward(self):
+        if self.past_actions:
+            row, col, text, new_text = self.past_actions.pop()
+            self.future_actions.append((row, col, text, new_text)) 
+            if len(self.future_actions) > 150:
+                self.future_actions.pop(0)
             item = self.table.item(row, col)
             item.setText(text)
+            self.rewind_auto_fill(row, col)
+            self.check_row_col_fill(row, col)
+
+    def action_forward(self):
+        if self.future_actions:
+            row, col, text, new_text = self.future_actions.pop(-1)
+            self.past_actions.append((row, col, text, new_text))
+            item = self.table.item(row, col)
+            item.setText(new_text)
             self.rewind_auto_fill(row, col)
             self.check_row_col_fill(row, col)
 
@@ -638,8 +651,8 @@ class MainWindow(QMainWindow):
         """) 
         submit_button.setText("Submit")
 
-        undo_button = QPushButton("Undo", self)
-        undo_button.setStyleSheet("""
+        action_backward_button = QPushButton("Back", self)
+        action_backward_button.setStyleSheet("""
             QPushButton {
                 background-color: #f44336;
                 color: white;
@@ -658,10 +671,32 @@ class MainWindow(QMainWindow):
             background-color: #da190b;
             }
         """) 
-        undo_button.setText("Undo")
+        action_backward_button.setText("Back")
 
+        action_forward_button = QPushButton("Forward", self)
+        action_forward_button.setStyleSheet("""
+            QPushButton {
+                background-color: #f44336;
+                color: white;                
+                border: none;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 25px;
+                margin: 4px 2px;
+                cursor: pointer;
+                border-radius: 8px;
+                font-weight: bold;
+            }
+        QPushButton:hover {
+            background-color: #da190b;
+            }
+        """) 
+        action_forward_button.setText("Forward")
+        action_forward_button.clicked.connect(self.action_forward)
         # 为撤销按钮添加点击事件
-        undo_button.clicked.connect(self.undo_action)
+        action_backward_button.clicked.connect(self.action_backward)
 
         # 为按钮添加点击事件
         submit_button.clicked.connect(self.check_result)
@@ -680,7 +715,9 @@ class MainWindow(QMainWindow):
         hbox.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         hbox.addWidget(submit_button)
         hbox.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
-        hbox.addWidget(undo_button)
+        hbox.addWidget(action_backward_button)
+        hbox.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        hbox.addWidget(action_forward_button)
         # 再次添加弹性空间
         hbox.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         hbox.addWidget(back_button)

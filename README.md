@@ -29,3 +29,8 @@ version 1.0.3 modifications:
 4. add key direction movement
 5. add auto fill crosses rewind
 6. fix undo rewind with auto fill crosses
+
+---
+version 1.0.4 modifications:
+
+1. add action forward
