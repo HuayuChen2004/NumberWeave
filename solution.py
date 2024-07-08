@@ -115,7 +115,9 @@ def sweep(size, row_counts, column_counts, map):
             break
     return check_map_fill(size, row_counts, column_counts, map)
                 
-def combine_and_trial(size, legal_rows, row_counts, column_counts, map_grid, answers):
+def combine_and_trial(size, legal_rows, row_counts, column_counts, map_grid, answers, max_time=10):
+    if time.time() - start_time > max_time:
+        return
     if all(len(row) <= 1 for row in legal_rows):
         map_copy = []
         for i in range(size):
@@ -133,12 +135,12 @@ def combine_and_trial(size, legal_rows, row_counts, column_counts, map_grid, ans
                 map_copy[i] = legal_row
                 legal_rows_copy = [row for row in legal_rows]
                 legal_rows_copy[i] = [legal_row]
-                combine_and_trial(size, legal_rows_copy, row_counts, column_counts, map_copy, answers)
+                combine_and_trial(size, legal_rows_copy, row_counts, column_counts, map_copy, answers, max_time)
     # 去重
     unique_answers = set(tuple(map(str, row)) for row in answers)  # 将每个地图转换为字符串的元组，然后转换为集合去重
     answers[:] = [list(map(eval, map_tuple)) for map_tuple in unique_answers]  # 将去重后的集合转换回二维列表形式
 
-def brute_force_solve(size, row_counts, column_counts):
+def brute_force_solve(size, row_counts, column_counts, max_time=10):
     answers = []
     map_grid = [[0] * size for _ in range(size)]
     if sweep(size, row_counts, column_counts, map_grid):
@@ -147,7 +149,7 @@ def brute_force_solve(size, row_counts, column_counts):
         legal_rows = []
         for i in range(size):
             legal_rows.append(generate_legal_rows_with_given_row(size, row_counts[i], map_grid[i]))
-        combine_and_trial(size, legal_rows, row_counts, column_counts, map_grid, answers)
+        combine_and_trial(size, legal_rows, row_counts, column_counts, map_grid, answers, max_time)
     return answers
 
 def Monte_Carlo_trial(size, legal_rows, row_counts, column_counts, map_grid, answers, max_time=10):
@@ -184,7 +186,7 @@ def Monte_Carlo_solve(size, row_counts, column_counts, answers, max_time=10):
         legal_rows = []
         for i in range(size):
             legal_rows.append(generate_legal_rows_with_given_row(size, row_counts[i], map_grid[i]))
-        Monte_Carlo_trial(size, legal_rows, row_counts, column_counts, map_grid, answers)
+        Monte_Carlo_trial(size, legal_rows, row_counts, column_counts, map_grid, answers, max_time)
 
 def equal_zero(row):
     for i in range(len(row)):
@@ -202,9 +204,9 @@ print(test_map)
 row_counts = test_map.get_row_count()
 col_counts = test_map.get_col_count()
 
-# answers = brute_force_solve(size, row_counts, col_counts)
-answers = []
-Monte_Carlo_solve(size, row_counts, col_counts, answers, max_time=10)
+answers = brute_force_solve(size, row_counts, col_counts, max_time=20)
+# answers = []
+# Monte_Carlo_solve(size, row_counts, col_counts, answers, max_time=20)
 
 for answer in answers:
     answer_map = Map(size)
